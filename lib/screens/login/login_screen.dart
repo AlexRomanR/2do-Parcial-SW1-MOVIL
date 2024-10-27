@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context,
                                   listen: false);
                               String respuesta = await authService.login(
-                                  email, password, 'movil');
+                                  email, password);
 
                               print(respuesta);
 

@@ -35,7 +35,7 @@ class _EditarLicenciaState extends State<EditarLicencia> {
   void initState() {
     final authservice = context.read<AuthService>();
     user_id = authservice.user.id.toString();
-    token = authservice.token!;
+   // token = authservice.token!;
     licenciasService = LicenciasService();
     _loadLicencias();
     super.initState();

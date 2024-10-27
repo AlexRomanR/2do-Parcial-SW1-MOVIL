@@ -15,6 +15,8 @@ class SideBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
     final user = authService.user;
+    final roleName = authService.rol;
+    final permissions = authService.permisos.join(', ');
 
     return Drawer(
       child: Container(
@@ -35,76 +37,77 @@ class SideBar extends StatelessWidget {
                 },
                 child: Center(
                   child: Text(
-                    'BIENVENIDO A\nUNI-SYS',
+                    'BIENVENIDO A\nUNI-SYS\n${user.name} Hola, $roleName, tus permisos son: $permissions'
+                    ,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white, // Texto blanco
-                      fontSize: 24,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
             ),
-            ListTile(
-              title: Text(
-                'PROGRAMACIÓN ACADEMICA',
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 184, 184, 184),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Visualizar mi Programación Academica',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProgramacionAcademicaView()));
-              },
-            ),
-            Divider(color: Colors.white, thickness: 1),
-            ListTile(
-              title: Text(
-                'GESTIÓN DE ASISTENCIAS',
-                style: TextStyle(
-                  color: const Color.fromARGB(255, 184, 184, 184),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text(
-                'Mis Asistencias',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AsistenciasView(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Mis Licencias',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LicenciasView(),
-                  ),
-                );
-              },
-            ),
+            // ListTile(
+            //   title: Text(
+            //     'PROGRAMACIÓN ACADEMICA',
+            //     style: TextStyle(
+            //       color: const Color.fromARGB(255, 184, 184, 184),
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
+            // ListTile(
+            //   title: Text(
+            //     'Visualizar mi Programación Academica',
+            //     style: TextStyle(color: Colors.white),
+            //   ),
+            //   onTap: () {
+            //     Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //             builder: (context) => const ProgramacionAcademicaView()));
+            //   },
+            // ),
+            // Divider(color: Colors.white, thickness: 1),
+            // ListTile(
+            //   title: Text(
+            //     'GESTIÓN DE ASISTENCIAS',
+            //     style: TextStyle(
+            //       color: const Color.fromARGB(255, 184, 184, 184),
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
+            // ListTile(
+            //   title: Text(
+            //     'Mis Asistencias',
+            //     style: TextStyle(color: Colors.white),
+            //   ),
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const AsistenciasView(),
+            //       ),
+            //     );
+            //   },
+            // ),
+            // ListTile(
+            //   title: Text(
+            //     'Mis Licencias',
+            //     style: TextStyle(color: Colors.white),
+            //   ),
+            //   onTap: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => const LicenciasView(),
+            //       ),
+            //     );
+            //   },
+            // ),
             Divider(color: Colors.white, thickness: 1),
             ListTile(
               title: Text(
@@ -121,7 +124,7 @@ class SideBar extends StatelessWidget {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
-                Provider.of<AuthService>(context, listen: false).logut();
+                Provider.of<AuthService>(context, listen: false).logout();
                 print('Presionado cerrar sesión');
 
                 Navigator.pushReplacement(

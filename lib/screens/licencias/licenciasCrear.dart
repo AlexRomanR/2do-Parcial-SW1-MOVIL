@@ -31,7 +31,7 @@ class _CrearLicenciaState extends State<CrearLicencia> {
     super.initState();
     final authservice = context.read<AuthService>();
     user_id = authservice.user.id.toString();
-    token = authservice.token!;
+  //  token = authservice.token!;
   }
 
   @override
