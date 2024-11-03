@@ -9,7 +9,7 @@ class AuthService extends ChangeNotifier {
   bool _isloggedIn = false;
   User? _user;
   String? _sessionId;
-  String? _rol;
+  List<String> _rol = [];
   List<String> _permisos = [];
 
   bool get authentificate => _isloggedIn;
@@ -22,7 +22,7 @@ class AuthService extends ChangeNotifier {
     return _user!;
   }
   
-  String? get rol => _rol;
+  List<String> get rol => _rol;
   List<String> get permisos => _permisos;
 
   String? get sessionId => _sessionId; // Getter para la sesión
@@ -59,7 +59,7 @@ class AuthService extends ChangeNotifier {
           print('Session ID: $_sessionId');
           await storageSessionId(_sessionId!);
           await trySession();
-          await obtenerRolYPermisos();
+          await obtenerRolesYPermisos();
           return 'correcto';
         } else {
           return 'No se pudo obtener session_id';
@@ -128,7 +128,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-Future<void> obtenerRolYPermisos() async {
+Future<void> obtenerRolesYPermisos() async {
   try {
     final url = Uri.parse('${servidor.baseURL}/api/rol-permisos/${_user!.id}');
 
@@ -140,36 +140,40 @@ Future<void> obtenerRolYPermisos() async {
         'Accept': 'application/json',
         'Cookie': 'session_id=$_sessionId',
       })
-      ..body = jsonEncode({}); // Agregar cuerpo vacío
+      ..body = jsonEncode({});
 
     final response = await http.Response.fromStream(await request.send());
 
     print('Response status: ${response.statusCode}');
     print('Response body: ${response.body}');
 
-     if (response.statusCode == 200) {
+    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
 
-      // Navegar correctamente hasta los roles
-      final roles = data['result']['roles'];
-      if (roles.isNotEmpty) {
-        final rol = roles.first;
-        _rol = rol['role_name'] ?? 'Rol desconocido';
-        _permisos = List<String>.from(rol['permissions'] ?? []);
+      // Procesa todos los roles obtenidos
+      final rolesData = data['result']['roles'];
+      if (rolesData.isNotEmpty) {
+        _rol = rolesData.map((rol) => rol['role_name'] ?? 'Rol desconocido').cast<String>().toList();
 
-        print('Rol: $_rol');
+        _permisos = rolesData.expand((rol) {
+          final permissions = rol['permissions'] ?? [];
+          return List<String>.from(permissions); // Convierte explícitamente a List<String>
+        }).toList();
+
+        print('Roles: $_rol');
         print('Permisos: $_permisos');
         notifyListeners();
       } else {
-        print('No se encontró ningún rol en la respuesta.');
+        print('No se encontraron roles en la respuesta.');
       }
     } else {
-      print('Error obteniendo rol y permisos: ${response.statusCode} ${response.reasonPhrase}');
+      print('Error obteniendo roles y permisos: ${response.statusCode} ${response.reasonPhrase}');
     }
   } catch (e) {
-    print('Error en obtenerRolYPermisos: $e');
+    print('Error en obtenerRolesYPermisos: $e');
   }
 }
+
 
 
 
