@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gestion_asistencia_docente/screens/asistencias/asistenciasView.dart';
+import 'package:gestion_asistencia_docente/screens/comunicados/comunicadosView.dart';
 import 'package:gestion_asistencia_docente/screens/licencias/licenciasView.dart';
 import 'package:gestion_asistencia_docente/screens/login/home_screen.dart';
 import 'package:gestion_asistencia_docente/screens/login/login_screen.dart';
@@ -15,7 +16,7 @@ class SideBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
     final user = authService.user;
-    final roleName = authService.rol;
+    final roles = authService.rol.join(', ');
     final permissions = authService.permisos.join(', ');
 
     return Drawer(
@@ -30,14 +31,14 @@ class SideBar extends StatelessWidget {
               ),
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.push( 
                     context,
                     MaterialPageRoute(builder: (context) => const HomeScreen()),
                   );
                 },
                 child: Center(
                   child: Text(
-                    'BIENVENIDO A\nUNI-SYS\n${user.name} Hola, $roleName, tus permisos son: $permissions'
+                    'BIENVENIDO A\nUNI-SYS\n${user.name} Hola, $roles, tus permisos son: $permissions'
                     ,
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -49,28 +50,28 @@ class SideBar extends StatelessWidget {
                 ),
               ),
             ),
-            // ListTile(
-            //   title: Text(
-            //     'PROGRAMACIÓN ACADEMICA',
-            //     style: TextStyle(
-            //       color: const Color.fromARGB(255, 184, 184, 184),
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            // ),
-            // ListTile(
-            //   title: Text(
-            //     'Visualizar mi Programación Academica',
-            //     style: TextStyle(color: Colors.white),
-            //   ),
-            //   onTap: () {
-            //     Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //             builder: (context) => const ProgramacionAcademicaView()));
-            //   },
-            // ),
-            // Divider(color: Colors.white, thickness: 1),
+            ListTile(
+              title: Text(
+                'COMUNICADOS Y ACTIVIDADES',
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 184, 184, 184),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            ListTile(
+              title: Text(
+                'Ver Comunicados',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ComunicadosView()));
+              },
+            ),
+            Divider(color: Colors.white, thickness: 1),
             // ListTile(
             //   title: Text(
             //     'GESTIÓN DE ASISTENCIAS',
