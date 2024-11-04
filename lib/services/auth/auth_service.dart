@@ -42,7 +42,7 @@ class AuthService extends ChangeNotifier {
         body: jsonEncode({
           "jsonrpc": "2.0",
           "params": {
-            "db": "AgendaElectronica2",
+            "db": "agenda",
             "login": email,
             "password": password,
           }

@@ -5,6 +5,7 @@ import 'package:gestion_asistencia_docente/screens/login/login_screen.dart';
 import 'package:gestion_asistencia_docente/services/api/asistenciasService.dart';
 import 'package:gestion_asistencia_docente/services/api/comunicadosService.dart';
 import 'package:gestion_asistencia_docente/services/api/licenciasService.dart';
+import 'package:gestion_asistencia_docente/services/api/notificaciones.dart';
 import 'package:gestion_asistencia_docente/services/api/programacion_academicaService.dart';
 import 'package:gestion_asistencia_docente/services/api/rolesServices.dart';
 import 'package:gestion_asistencia_docente/services/auth/auth_service.dart';
@@ -32,7 +33,7 @@ class _AppStateState extends State<AppState> {
         ChangeNotifierProvider(create: ( _ ) => LicenciasService()),
         ChangeNotifierProvider(create: ( _ ) => ComunicadoService()),
         ChangeNotifierProvider(create: ( _ ) => RoleService()),
-
+        ChangeNotifierProvider(create: ( _ ) => NotificacionesService()),
 
      //   ChangeNotifierProvider(create: ( _ ) => VehicleService()),
       ],
