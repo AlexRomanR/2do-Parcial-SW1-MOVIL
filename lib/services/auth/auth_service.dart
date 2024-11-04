@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gestion_asistencia_docente/api/firebase_api.dart';
 import 'package:gestion_asistencia_docente/models/user.dart';
 import 'package:gestion_asistencia_docente/services/server.dart';
 import 'package:http/http.dart' as http;
@@ -11,17 +12,17 @@ class AuthService extends ChangeNotifier {
   String? _sessionId;
   List<String> _rol = [];
   List<String> _permisos = [];
-
+  final FirebaseApi _firebaseApi = FirebaseApi();
   bool get authentificate => _isloggedIn;
   User? get userOrNull => _user;
-  
+
   User get user {
     if (_user == null) {
       throw StateError('Usuario no inicializado');
     }
     return _user!;
   }
-  
+
   List<String> get rol => _rol;
   List<String> get permisos => _permisos;
 
@@ -60,6 +61,7 @@ class AuthService extends ChangeNotifier {
           await storageSessionId(_sessionId!);
           await trySession();
           await obtenerRolesYPermisos();
+          await sendFirebaseToken();
           return 'correcto';
         } else {
           return 'No se pudo obtener session_id';
@@ -71,6 +73,30 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       print('Error en login: $e');
       return 'Error en login';
+    }
+  }
+
+  Future<void> sendFirebaseToken() async {
+    final fcmToken = await _firebaseApi.getToken();
+    if (fcmToken == null) {
+      print("No se pudo obtener el token de Firebase");
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('${servidor.baseURL}/api/device_token/$fcmToken'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Cookie': 'session_id=$_sessionId',
+      },
+      body: jsonEncode({}),
+    );
+
+    if (response.statusCode == 200) {
+      print("Token de Firebase enviado exitosamente");
+    } else {
+      print("Error al enviar el token de Firebase: ${response.body}");
     }
   }
 
@@ -93,12 +119,12 @@ class AuthService extends ChangeNotifier {
   /// Verifica el `session_id` guardado y recupera los datos del usuario.
   Future<void> trySession() async {
     final storedSessionId = await _storage.read(key: 'session_id');
-  
+
     if (storedSessionId == null) {
       print('No hay session_id almacenado');
       return;
     }
-  
+
     try {
       final response = await http.post(
         Uri.parse('${servidor.baseURL}/web/session/get_session_info'),
@@ -109,10 +135,10 @@ class AuthService extends ChangeNotifier {
         },
         body: jsonEncode({}), // Body JSON vacío
       );
-  
+
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
-  
+
       if (response.statusCode == 200) {
         var decodedBody = jsonDecode(response.body)['result'];
         _isloggedIn = true;
@@ -128,54 +154,57 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-Future<void> obtenerRolesYPermisos() async {
-  try {
-    final url = Uri.parse('${servidor.baseURL}/api/rol-permisos/${_user!.id}');
+  Future<void> obtenerRolesYPermisos() async {
+    try {
+      final url =
+          Uri.parse('${servidor.baseURL}/api/rol-permisos/${_user!.id}');
 
-    print('Llamando a: $url');
+      print('Llamando a: $url');
 
-    final request = http.Request('GET', url)
-      ..headers.addAll({
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Cookie': 'session_id=$_sessionId',
-      })
-      ..body = jsonEncode({});
+      final request = http.Request('GET', url)
+        ..headers.addAll({
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Cookie': 'session_id=$_sessionId',
+        })
+        ..body = jsonEncode({});
 
-    final response = await http.Response.fromStream(await request.send());
+      final response = await http.Response.fromStream(await request.send());
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-      // Procesa todos los roles obtenidos
-      final rolesData = data['result']['roles'];
-      if (rolesData.isNotEmpty) {
-        _rol = rolesData.map((rol) => rol['role_name'] ?? 'Rol desconocido').cast<String>().toList();
+        // Procesa todos los roles obtenidos
+        final rolesData = data['result']['roles'];
+        if (rolesData.isNotEmpty) {
+          _rol = rolesData
+              .map((rol) => rol['role_name'] ?? 'Rol desconocido')
+              .cast<String>()
+              .toList();
 
-        _permisos = rolesData.expand((rol) {
-          final permissions = rol['permissions'] ?? [];
-          return List<String>.from(permissions); // Convierte explícitamente a List<String>
-        }).toList();
+          _permisos = rolesData.expand((rol) {
+            final permissions = rol['permissions'] ?? [];
+            return List<String>.from(
+                permissions); // Convierte explícitamente a List<String>
+          }).toList();
 
-        print('Roles: $_rol');
-        print('Permisos: $_permisos');
-        notifyListeners();
+          print('Roles: $_rol');
+          print('Permisos: $_permisos');
+          notifyListeners();
+        } else {
+          print('No se encontraron roles en la respuesta.');
+        }
       } else {
-        print('No se encontraron roles en la respuesta.');
+        print(
+            'Error obteniendo roles y permisos: ${response.statusCode} ${response.reasonPhrase}');
       }
-    } else {
-      print('Error obteniendo roles y permisos: ${response.statusCode} ${response.reasonPhrase}');
+    } catch (e) {
+      print('Error en obtenerRolesYPermisos: $e');
     }
-  } catch (e) {
-    print('Error en obtenerRolesYPermisos: $e');
   }
-}
-
-
-
 
   /// Cierra sesión y limpia los datos.
   void logout() async {
