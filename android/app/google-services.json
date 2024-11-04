@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "927666424807",
+    "project_id": "agenda-8c512",
+    "storage_bucket": "agenda-8c512.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:927666424807:android:cb827d259fbc74b4510b42",
+        "android_client_info": {
+          "package_name": "com.example.gestion_asistencia_docente"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGs48FTN9WFNSlpr_dWTJ_VwTIeA7r1rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

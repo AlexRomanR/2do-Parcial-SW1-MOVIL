@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestion_asistencia_docente/components/utils/sidebar.dart';
+import 'package:gestion_asistencia_docente/screens/notificacionesScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,6 +16,19 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: const SideBar(),
       appBar: AppBar(
         title: const Text('Inicio'),
+        actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => NotificacionesScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
         foregroundColor: Colors.white, // Color del texto en blanco
       ),
       body: Stack(
