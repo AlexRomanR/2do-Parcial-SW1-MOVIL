@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestion_asistencia_docente/screens/comunicados/crearComunicado.dart';
 import 'package:gestion_asistencia_docente/screens/comunicados/editarComunicado.dart';
+import 'package:gestion_asistencia_docente/screens/comunicados/lecturasComunicadoView.dart';
 import 'package:gestion_asistencia_docente/screens/comunicados/verComunicadosView.dart';
 import 'package:gestion_asistencia_docente/server.dart';
 import 'package:gestion_asistencia_docente/services/api/comunicadosService.dart';
+import 'package:gestion_asistencia_docente/services/api/lectoresComunicados.dart';
 import 'package:gestion_asistencia_docente/services/auth/auth_service.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -148,15 +150,16 @@ import 'package:provider/provider.dart';
           backgroundColor: Colors.black,
           iconTheme: IconThemeData(color: Colors.white),
           actions: [
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CrearComunicado()),
-                );
-              },
-            ),
+             if (canEditOrDelete)
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CrearComunicado()),
+                  );
+                },
+              ),
           ],
         ),
         backgroundColor: Colors.black,
@@ -254,6 +257,42 @@ import 'package:provider/provider.dart';
                                 child: Text('Editar'),
                               ),
                             ),
+                            SizedBox(height: 10),
+                            if (canEditOrDelete)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  // Obtener el servicio de LectoresActividadesService
+                                  final lectoresService = Provider.of<LectoresComunicadosService>(context, listen: false);
+                                  
+                                  // Intentar cargar los lectores desde el servicio
+                                  try {
+                                    final lectores = await lectoresService.loadLectorComunicadoes(context, comunicado.id.toString());
+              
+                                    // Navegar a LecturasActividadView con los datos obtenidos
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LecturasComunicadoView(
+                                          comunicado: comunicado,
+                                          lecturas: lectores,
+                                        ),
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    // Manejar el error si la carga falla
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error al cargar lectores: $e')),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                                ),
+                                child: Text('Leídos'),
+                              ),
+                            ),  
                           SizedBox(height: 10),
                           // Solo muestra el botón de eliminar si el usuario tiene permisos
                           if (canEditOrDelete)

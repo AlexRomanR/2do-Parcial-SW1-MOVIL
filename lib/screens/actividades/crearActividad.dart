@@ -4,65 +4,94 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gestion_asistencia_docente/models/cursos.dart';
-import 'package:gestion_asistencia_docente/models/roles.dart';
+import 'package:gestion_asistencia_docente/models/cursoMateria.dart';
 import 'package:gestion_asistencia_docente/server.dart';
+import 'package:gestion_asistencia_docente/services/api/cursoMateriaService.dart';
 import 'package:gestion_asistencia_docente/services/api/cursosServices.dart';
-import 'package:gestion_asistencia_docente/services/api/rolesServices.dart';
 import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 
 
-class CrearComunicado extends StatefulWidget {
-  const CrearComunicado({Key? key}) : super(key: key);
+class CrearActividad extends StatefulWidget {
+  const CrearActividad({Key? key}) : super(key: key);
 
   @override
-  _CrearComunicadoState createState() => _CrearComunicadoState();
+  _CrearActividadState createState() => _CrearActividadState();
 }
 
-class _CrearComunicadoState extends State<CrearComunicado> {
+class _CrearActividadState extends State<CrearActividad> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   TextEditingController motivoController = TextEditingController();
   TextEditingController textoController = TextEditingController();
+  DateTime? fechaInicio;
+  DateTime? fechaPresentacion;
 
   File? archivo;
   bool isLoading = true;
 
-  List<Role> rolesDisponibles = [];
-  List<Role> rolesSeleccionados = [];
-  List<Curso> cursosDisponibles = [];
-  List<Curso> cursosSeleccionados = [];
+  List<CursoMateria> cursoMateriaDisponibles = [];
+  CursoMateria? cursoMateriaSeleccionado; 
   final Server servidor = Server();
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
-      await _loadRoles();
-      await _loadCursos();
+      await _loadCursoMaterias();
     });
   }
 
-  Future<void> _loadRoles() async {
-    final roleService = Provider.of<RoleService>(context, listen: false);
-    rolesDisponibles = await roleService.loadRoles(context);
+  Future<void> _loadCursoMaterias() async {
+    final cursoMateriaService = Provider.of<CursoMateriaService>(context, listen: false);
+    cursoMateriaDisponibles = await cursoMateriaService.loadCursoMaterias(context);
     setState(() {
       isLoading = false;
     });
   }
 
-  Future<void> _loadCursos() async {
-    final cursoService = Provider.of<CursoService>(context, listen: false);
-    cursosDisponibles = await cursoService.loadCursos(context);
-    setState(() {
-      isLoading = false;
-    });
+
+  Future<void> _selectDate(BuildContext context, {required bool isInicio}) async {
+    DateTime now = DateTime.now();
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(now.year - 5),
+      lastDate: DateTime(now.year + 5),
+    );
+
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (pickedTime != null) {
+        final selectedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        setState(() {
+          if (isInicio) {
+            fechaInicio = selectedDateTime;
+          } else {
+            fechaPresentacion = selectedDateTime;
+          }
+        });
+      }
+    }
   }
+
 
   Future<void> _seleccionarArchivo() async {
     final result = await FilePicker.platform.pickFiles();
@@ -81,17 +110,21 @@ class _CrearComunicadoState extends State<CrearComunicado> {
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      final uri = Uri.parse('${servidor.baseURL}/api/comunicado/create');
+      final uri = Uri.parse('${servidor.baseURL}/api/actividad/create');
       final request = http.MultipartRequest('POST', uri);
+      // Formato de fecha en 'YYYY-MM-DD HH:MM:SS'
+      final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+      final formattedFechaInicio = dateFormat.format(fechaInicio!);
+      final formattedFechaPresentacion = dateFormat.format(fechaPresentacion!);
   
       // Agregar campos y archivo
       request.fields['motivo'] = motivoController.text;
       request.fields['texto'] = textoController.text;
-      request.fields['rol_ids'] = '[${rolesSeleccionados.map((role) => role.id).join(",")}]';
-      request.fields['curso_ids'] = '[${cursosSeleccionados.map((curso) => curso.id).join(",")}]';
-
-      print('[${rolesSeleccionados.map((role) => role.id).join(",")}]');
-      print('[${cursosSeleccionados.map((curso) => curso.id).join(",")}]');
+      request.fields['curso_docente_materia_id'] = cursoMateriaSeleccionado!.id.toString(); 
+      request.fields['fecha_inicio'] = formattedFechaInicio;
+      request.fields['fecha_presentacion'] = formattedFechaPresentacion;
+  
+      print(cursoMateriaSeleccionado!.id.toString());
 
       if (archivo != null) {
         request.files.add(await http.MultipartFile.fromPath(
@@ -125,14 +158,14 @@ class _CrearComunicadoState extends State<CrearComunicado> {
   
         if (response.statusCode == 200) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Comunicado creado con éxito')),
+            const SnackBar(content: Text('Actividad creado con éxito')),
           );
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error al crear el comunicado')),
+            const SnackBar(content: Text('Error al crear el actividad')),
           );
-          print("Error al crear el comunicado: ${response.statusCode}");
+          print("Error al crear el actividad: ${response.statusCode}");
           print("Error details: $responseBody");
         }
       } catch (e) {
@@ -150,7 +183,7 @@ class _CrearComunicadoState extends State<CrearComunicado> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Crear Comunicado', style: TextStyle(color: Colors.white)),
+        title: Text('Crear Actividad', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         iconTheme: IconThemeData(color: Colors.white),
       ),
@@ -188,63 +221,47 @@ class _CrearComunicadoState extends State<CrearComunicado> {
                       maxLines: 2,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Por favor, ingresa el texto del comunicado';
+                          return 'Por favor, ingresa el texto del actividad';
                         }
                         return null;
                       },
                     ),
 
-                    const SizedBox(height: 50.0),
-                    MultiSelectDialogField<Role>(
-                      items: rolesDisponibles
-                          .map((role) => MultiSelectItem<Role>(role, role.name))
-                          .toList(),
-                      title: const Text(
-                        'Roles',
-                        style: TextStyle(color: Colors.white), // Cambia el color del título a blanco
-                      ),
-                      selectedItemsTextStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)), // Texto seleccionado en blanco
-                      itemsTextStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)), // Texto de elementos en blanco
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      buttonText: const Text(
-                        'Seleccionar roles',
-                        style: TextStyle(color: Colors.white), // Cambia el color del botón a blanco
-                      ),
-                      onConfirm: (List<Role> selectedRoles) {
-                        setState(() {
-                          rolesSeleccionados = selectedRoles;
-                        });
-                      },
-                      initialValue: rolesSeleccionados,
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () => _selectDate(context, isInicio: true),
+                      child: Text(fechaInicio != null
+                          ? 'Fecha de Inicio: ${fechaInicio!.toIso8601String().split("T")[0]}'
+                          : 'Seleccionar Fecha de Inicio'),
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () => _selectDate(context, isInicio: false),
+                      child: Text(fechaPresentacion != null
+                          ? 'Fecha de Presentación: ${fechaPresentacion!.toIso8601String().split("T")[0]}'
+                          : 'Seleccionar Fecha de Presentación'),
                     ),
                     const SizedBox(height: 50.0),
-                    MultiSelectDialogField<Curso>(
-                      items: cursosDisponibles
-                          .map((curso) => MultiSelectItem<Curso>(curso, curso.displayName))
-                          .toList(),
-                      title: const Text(
-                        'Cursos',
-                        style: TextStyle(color: Colors.white), // Cambia el color del título a blanco
+                    DropdownButtonFormField<CursoMateria>(
+                      decoration: InputDecoration(
+                        labelText: 'Curso Materia',
+                        border: OutlineInputBorder(),
                       ),
-                      selectedItemsTextStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)), // Texto seleccionado en blanco
-                      itemsTextStyle: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)), // Texto de elementos en blanco
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      buttonText: const Text(
-                        'Seleccionar cursos',
-                        style: TextStyle(color: Colors.white), // Cambia el color del botón a blanco
-                      ),
-                      onConfirm: (List<Curso> selectedCursos) {
+                      items: cursoMateriaDisponibles.map((cursoMateria) {
+                        return DropdownMenuItem<CursoMateria>(
+                          value: cursoMateria,
+                          child: Text(cursoMateria.nombre,  style: TextStyle(color: Color.fromARGB(255, 107, 107, 107)),),
+                          
+                        );
+                      }).toList(),
+                      onChanged: (value) {
                         setState(() {
-                          cursosSeleccionados = selectedCursos;
+                          cursoMateriaSeleccionado = value;
                         });
                       },
-                      initialValue: cursosSeleccionados,
+                      validator: (value) =>
+                          value == null ? 'Por favor, selecciona un curso y materia' : null,
+                          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)), // Estilo del texto del valor seleccionado
                     ),
                     const SizedBox(height: 40.0),
                     ElevatedButton(
@@ -264,7 +281,7 @@ class _CrearComunicadoState extends State<CrearComunicado> {
                     Center(
                       child: ElevatedButton(
                         onPressed: _submitForm,
-                        child: const Text('Crear Comunicado'),
+                        child: const Text('Crear Actividad'),
                       ),
                     ),
                   ],
