@@ -1,30 +1,28 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:gestion_asistencia_docente/models/notification.dart';
+import 'package:gestion_asistencia_docente/models/evento.dart';
 import 'package:gestion_asistencia_docente/server.dart';
 import 'package:gestion_asistencia_docente/services/auth/auth_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
-class NotificacionesService extends ChangeNotifier {
-  List<Notificaciones> notificaciones = [];
+class EventosService extends ChangeNotifier {
+  List<Evento> eventos = [];
   bool isLoading = true;
   final Server servidor = Server();
 
-  Future<List<Notificaciones>> loadNotificaciones(BuildContext context) async {
+  Future<List<Evento>> loadEventos(BuildContext context) async {
     isLoading = true;
     notifyListeners();
 
     final authService = Provider.of<AuthService>(context, listen: false);
     final sessionId = authService.sessionId;
 
-    // Si no hay sessionId, devolvemos un error
     if (sessionId == null) {
       throw Exception('No se encontró session_id');
     }
 
-    // Crear y enviar la solicitud
-    final url = Uri.parse('${servidor.baseURL}api/notificaciones');
+    final url = Uri.parse('${servidor.baseURL}api/eventos');
     final request = http.Request('GET', url)
       ..headers.addAll({
         'Content-Type': 'application/json',
@@ -38,14 +36,13 @@ class NotificacionesService extends ChangeNotifier {
     if (response.statusCode == 200) {
       final responseData = json.decode(utf8.decode(response.bodyBytes));
 
-      // Convertir la lista de comunicados en objetos Comunicado
-      notificaciones = List<Notificaciones>.from(
-        responseData['notifications'].map((data) => Notificaciones.fromMap(data)),
+      eventos = List<Evento>.from(
+        responseData['eventos'].map((data) => Evento.fromMap(data)),
       );
 
       isLoading = false;
       notifyListeners();
-      return notificaciones;
+      return eventos;
     } else {
       isLoading = false;
       notifyListeners();
@@ -53,43 +50,41 @@ class NotificacionesService extends ChangeNotifier {
     }
   }
 
-  Future<String> marcarTodasComoLeidas(BuildContext context) async {
+  Future<Evento> loadEvento(BuildContext context, String eventoId) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final sessionId = authService.sessionId;
 
-    // Verificar si hay un sessionId válido
     if (sessionId == null) {
       throw Exception('No se encontró session_id');
     }
 
-    final url = Uri.parse('${servidor.baseURL}/api/notificaciones/marcartodas');
-    final response = await http.post(
+    final url = Uri.parse('${servidor.baseURL}api/evento/ver/$eventoId');
+    final response = await http.get(
       url,
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
         'Cookie': 'session_id=$sessionId',
       },
-      body: jsonEncode({}),
     );
 
     if (response.statusCode == 200) {
-      print("Todas las notificaciones fueron marcadas como leídas");
-      return 'hecho';
+      final responseData = json.decode(utf8.decode(response.bodyBytes));
+      final evento = Evento.fromMap(responseData['evento']);
+      return evento;
     } else {
-      print("Error al marcar todas como leídas");
-      return 'error';
+      throw Exception('Failed to load evento: ${response.body}');
     }
   }
 
-  Future<String> marcarComoLeida(BuildContext context, String notificacionId) async {
+  Future<String> confirmarAsistencia(BuildContext context, String eventoId) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final sessionId = authService.sessionId;
 
     if (sessionId == null) {
       throw Exception('No se encontró session_id');
     }
-    final url = Uri.parse('${servidor.baseURL}/api/notificacion/marcar/$notificacionId');
+    final url = Uri.parse('${servidor.baseURL}api/evento/confirmar/$eventoId');
     final response = await http.post(
       url,
       headers: {
@@ -108,5 +103,4 @@ class NotificacionesService extends ChangeNotifier {
       return 'error';
     }
   }
-
 }

@@ -7,6 +7,7 @@ import 'package:gestion_asistencia_docente/services/api/actividadesService.dart'
 import 'package:gestion_asistencia_docente/services/api/asistenciasService.dart';
 import 'package:gestion_asistencia_docente/services/api/categoriasService.dart';
 import 'package:gestion_asistencia_docente/services/api/comunicadosService.dart';
+import 'package:gestion_asistencia_docente/services/api/eventosService.dart';
 import 'package:gestion_asistencia_docente/services/api/configuracionesService.dart';
 import 'package:gestion_asistencia_docente/services/api/cursoMateriaService.dart';
 import 'package:gestion_asistencia_docente/services/api/cursosServices.dart';
@@ -64,6 +65,7 @@ class _AppStateState extends State<AppState> {
         ChangeNotifierProvider(create: (_) => ResultadoService()),   
         ChangeNotifierProvider(create: (_) => CategoriaService()),    
         ChangeNotifierProvider(create: (_) => NotificacionesService()),
+        ChangeNotifierProvider(create: (_) => EventosService()),
 
         //   ChangeNotifierProvider(create: ( _ ) => VehicleService()),
       ],

@@ -4,6 +4,7 @@ import 'package:gestion_asistencia_docente/screens/actividades/actividadesView.d
 import 'package:gestion_asistencia_docente/screens/asistencias/asistenciasView.dart';
 import 'package:gestion_asistencia_docente/screens/categorias/categoriasView.dart';
 import 'package:gestion_asistencia_docente/screens/comunicados/comunicadosView.dart';
+import 'package:gestion_asistencia_docente/screens/eventos/listaEventos.dart';
 import 'package:gestion_asistencia_docente/screens/configuraciones/editConfiguracion.dart';
 import 'package:gestion_asistencia_docente/screens/cursos/cursosView.dart';
 import 'package:gestion_asistencia_docente/screens/cursos/rankingCursoView.dart';
@@ -131,6 +132,18 @@ class SideBar extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => const ActividadesView()));
+              },
+            ),
+             ListTile(
+              title: Text(
+                'Ver Eventos',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const EventosScreen()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
