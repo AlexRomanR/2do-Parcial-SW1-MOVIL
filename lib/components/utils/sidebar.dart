@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gestion_asistencia_docente/screens/asistencias/asistenciasView.dart';
 import 'package:gestion_asistencia_docente/screens/comunicados/comunicadosView.dart';
+import 'package:gestion_asistencia_docente/screens/eventos/listaEventos.dart';
 import 'package:gestion_asistencia_docente/screens/licencias/licenciasView.dart';
 import 'package:gestion_asistencia_docente/screens/login/home_screen.dart';
 import 'package:gestion_asistencia_docente/screens/login/login_screen.dart';
@@ -69,6 +70,18 @@ class SideBar extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                         builder: (context) => const ComunicadosView()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Ver Eventos',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const EventosScreen()));
               },
             ),
             Divider(color: Colors.white, thickness: 1),
