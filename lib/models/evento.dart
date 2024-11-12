@@ -16,6 +16,7 @@ class Evento {
     bool asistencia;
     bool confirmacion;
     int estudianteId;
+    String? estudiante; // Nuevo atributo opcional
 
     Evento({
         required this.id,
@@ -29,6 +30,7 @@ class Evento {
         required this.asistencia,
         required this.confirmacion,
         required this.estudianteId,
+        this.estudiante, // Se agrega al constructor
     });
 
     factory Evento.fromMap(Map<String, dynamic> json) => Evento(
@@ -43,6 +45,7 @@ class Evento {
         asistencia: json["asistencia"],
         confirmacion: json["confirmacion"],
         estudianteId: json["estudiante_id"],
+        estudiante: json["estudiante"], // Se asigna desde el JSON (puede ser null)
     );
 
     Map<String, dynamic> toMap() => {
@@ -57,5 +60,6 @@ class Evento {
         "asistencia": asistencia,
         "confirmacion": confirmacion,
         "estudiante_id": estudianteId,
+        "estudiante": estudiante, // Se agrega al mapeo
     };
 }

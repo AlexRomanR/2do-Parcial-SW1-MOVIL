@@ -65,8 +65,8 @@ class _EventosScreenState extends State<EventosScreen> {
                             evento.tipo,
                             style: TextStyle(
                               color: Colors.orange,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -78,6 +78,17 @@ class _EventosScreenState extends State<EventosScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
+                          if (evento.estudiante != null) // Verificar si el atributo estudiante está presente
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text(
+                                'Estudiante: ${evento.estudiante}',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
                           Text(
                             'Fecha: ${evento.fecha}',
                             style: const TextStyle(
