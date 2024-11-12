@@ -6,6 +6,7 @@ class Comunicado {
   final String? administrativo;
   final DateTime fechaCreacion;
   final List<String> roles; 
+  final List<String> cursos; 
   final String formatoarchivo;
   final String publicURL;
 
@@ -18,6 +19,7 @@ class Comunicado {
     this.administrativo,
     required this.fechaCreacion,
     required this.roles,
+    required this.cursos,
     required this.formatoarchivo,
     required this.publicURL,
   });
@@ -32,6 +34,7 @@ class Comunicado {
       administrativo: json['administrativo'],
       fechaCreacion: DateTime.parse(json['fecha_creacion']),
       roles: json['roles'] != null ? List<String>.from(json['roles']) : [], // Manejo de null en roles
+      cursos: json['cursos'] != null ? List<String>.from(json['cursos']) : [], // Manejo de null en roles
       formatoarchivo: json['formatoarchivo'],
       publicURL: json['publicURL'] is String ? json['publicURL'] : '',
 
@@ -48,6 +51,7 @@ class Comunicado {
       'administrativo': administrativo,
       'fecha_creacion': fechaCreacion.toIso8601String(),
       'roles': roles, 
+      'cursos': cursos, 
       'formatoarchivo': formatoarchivo,
       'publicURL': publicURL,
     };
