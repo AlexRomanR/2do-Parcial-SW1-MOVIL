@@ -33,7 +33,7 @@ class _IniciarDesafioViewState extends State<IniciarDesafioView> {
   final FlutterSecureStorage _storage = FlutterSecureStorage();
   final Server servidor = Server();
   late Timer _timer = Timer(Duration.zero, () {}); // Inicialización segura
-  int _timeLeft = 10; // Tiempo en segundos
+  int _timeLeft = 60; // Tiempo en segundos
   bool _hasFinished = false;
 
 
@@ -389,7 +389,7 @@ void _nextQuestion() {
       _hasSelectedOption = false;
       
       // Reiniciar el tiempo y cancelar el temporizador anterior
-      _timeLeft = 10; 
+      _timeLeft = 60; 
       _timer.cancel();
       _startTimer(); // Iniciar el temporizador de nuevo para la nueva pregunta
     });
