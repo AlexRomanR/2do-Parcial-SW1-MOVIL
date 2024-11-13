@@ -192,7 +192,7 @@ class SideBar extends StatelessWidget {
                 },
               ),
 
-            if(docente)
+            if(estudiante)
               ListTile(
                 title: Text(
                   'RANKINGS Y DESAFIOS',
