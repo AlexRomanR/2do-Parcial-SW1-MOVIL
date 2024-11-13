@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  'Sistema de control de asistencias\nUNI-SYS',
+                  'Agenda Electronica\nUNI-SYS',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 500),
                 Text(
-                  'A través de un sistema innovador facilitamos la toma de asistencia de docentes de forma precisa',
+                  'A través de un sistema innovador facilitamos una agenda electronica para realizar actividades',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,

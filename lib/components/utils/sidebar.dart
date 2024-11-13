@@ -89,7 +89,7 @@ class SideBar extends StatelessWidget {
                 },
                 child: Center(
                   child: Text(
-                    'BIENVENIDO A\nUNI-SYS\n${user.name} Hola, $roles, tus permisos son: $permissions'
+                    'BIENVENIDO A\nUNI-SYS\n${user.name}'
                     ,
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -203,6 +203,17 @@ class SideBar extends StatelessWidget {
                     ),
                   );
                 },
+              ),
+
+            if(estudiante)
+              ListTile(
+                title: Text(
+                  'RANKINGS Y DESAFIOS',
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 184, 184, 184),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
 
             if (estudiante)  
